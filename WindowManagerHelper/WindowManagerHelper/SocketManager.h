@@ -5,6 +5,8 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <cinttypes>
+#include <tuple>
+#include <string>
 #undef min
 #undef max
 
@@ -18,7 +20,8 @@ public:
 	SocketManager(SocketManager&&) = delete;
 	SocketManager& operator=(SocketManager&&) = delete;
 
-	void SendLeagueClientDimensions(int top, int left, int bottom, int right);
+	void SendLeagueClientDimensions(const std::tuple<int, int, int, int>& dimensions);
+	void SendString(const std::string& str);
 	bool CheckForTerminationMessage();
 
 private:

@@ -19,8 +19,10 @@ int main(int argc, char** argv)
 		int delay = std::stoi(argv[2]);
 		while (!man.CheckForTerminationMessage())
 		{
-			auto [top, left, bottom, right] = LeagueWindowPositionGetter::GetLeagueWindowPosition();
-			man.SendLeagueClientDimensions(top, left, bottom, right);
+			if (LeagueWindowPositionGetter::LeagueIsInForeground())
+				man.SendLeagueClientDimensions(LeagueWindowPositionGetter::GetLeagueWindowPosition());
+			else
+				man.SendString("background");
 			Sleep(delay);
 		}
 	}

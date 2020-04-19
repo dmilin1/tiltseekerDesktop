@@ -9,3 +9,9 @@ std::tuple<int, int, int, int> LeagueWindowPositionGetter::GetLeagueWindowPositi
 	GetWindowRect(leagueClientWindow, &windowPosOut);
 	return {windowPosOut.left, windowPosOut.top, windowPosOut.bottom, windowPosOut.right};
 }
+
+bool LeagueWindowPositionGetter::LeagueIsInForeground()
+{
+	static HWND leagueClientWindow = FindWindow(nullptr, TEXT("League of Legends"));
+	return leagueClientWindow == GetForegroundWindow();
+}

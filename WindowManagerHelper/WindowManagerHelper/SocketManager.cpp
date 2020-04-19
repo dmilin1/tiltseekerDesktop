@@ -1,7 +1,6 @@
 #include "SocketManager.h"
 #include <stdexcept>
 #include <algorithm>
-#include <string>
 
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
@@ -20,11 +19,16 @@ SocketManager::~SocketManager()
 	WSACleanup();
 }
 
-void SocketManager::SendLeagueClientDimensions(int top, int left, int bottom, int right)
+void SocketManager::SendLeagueClientDimensions(const std::tuple<int, int, int, int>& dimensions)
 {
+	auto [top, left, bottom, right] = dimensions;
 	std::string sendBuffer = std::to_string(left) + ", " + std::to_string(top) + ", " + std::to_string(bottom) + ", " + std::to_string(right);
-	int retv = send(mSocket, sendBuffer.c_str(), sendBuffer.size(), 0);
-	if (retv == SOCKET_ERROR)
+	SendString(sendBuffer);
+}
+
+void SocketManager::SendString(const std::string& str)
+{
+	if (send(mSocket, str.c_str(), str.size(), 0) == SOCKET_ERROR)
 		throw std::runtime_error("send failed");
 }
 
