@@ -28,7 +28,7 @@ void SocketManager::SendLeagueClientDimensions(const std::tuple<int, int, int, i
 
 void SocketManager::SendString(const std::string& str)
 {
-	if (send(mSocket, str.c_str(), str.size(), 0) == SOCKET_ERROR)
+	if (send(mSocket, str.c_str(), static_cast<int>(str.size()), 0) == SOCKET_ERROR)
 		throw std::runtime_error("send failed");
 }
 
@@ -42,7 +42,7 @@ bool SocketManager::CheckForTerminationMessage()
 		static char buf[512];
 		// Grab the data.
 		// TODO - check whether the data is actually a shutdown message.
-		int bytesReceived = recv(mSocket, buf, std::max(static_cast<size_t>(availableBytesOut), sizeof(buf)), 0);
+		int bytesReceived = recv(mSocket, buf, static_cast<int>(std::max(static_cast<size_t>(availableBytesOut), sizeof(buf))), 0);
 		if (bytesReceived == SOCKET_ERROR)
 			throw std::runtime_error("receive failed");
 		return true;
