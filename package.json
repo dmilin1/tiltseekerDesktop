@@ -1,7 +1,7 @@
 {
   "name": "tiltseekerdesktop",
   "productName": "Tiltseeker",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
@@ -82,7 +82,9 @@
     "axios": "^0.19.2",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^5.1.1",
+    "get-port": "^5.1.1",
     "iohook": "^0.6.5",
+    "node-ipc": "^9.1.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "update-electron-app": "^1.5.0",

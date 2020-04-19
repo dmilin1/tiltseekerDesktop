@@ -98,6 +98,7 @@ module.exports = function () {
       champSelectWindow.hide();
     } else {
       var height = bounds.widthHeight[1] * 0.08;
+      console.log(bounds);
       champSelectWindow.setBounds({
         x: bounds.topLeft[0],
         y: bounds.topLeft[1] - height,

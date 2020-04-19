@@ -1,120 +1,13 @@
 const {
-  exec
+  execFile
 } = require('child_process');
 
-const getWindowScriptWindows = timer => `
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-public class Tricks {
-[DllImport("user32.dll")]
-public static extern IntPtr GetForegroundWindow();
-}
-"@
+const getPort = require('get-port');
 
-Function Get-Window {
-    <#
-        .SYNOPSIS
-            Retrieve the window size (height,width) and coordinates (x,y) of
-            a process window.
-
-        .DESCRIPTION
-            Retrieve the window size (height,width) and coordinates (x,y) of
-            a process window.
-
-        .PARAMETER ProcessName
-            Name of the process to determine the window characteristics
-
-        .NOTES
-            Name: Get-Window
-            Author: Boe Prox
-            Version History
-                1.0//Boe Prox - 11/20/2015
-                    - Initial build
-
-        .OUTPUT
-            System.Automation.WindowInfo
-
-        .EXAMPLE
-            Get-Process powershell | Get-Window
-
-            ProcessName Size     TopLeft  BottomRight
-            ----------- ----     -------  -----------
-            powershell  1262,642 2040,142 3302,784
-
-            Description
-            -----------
-            Displays the size and coordinates on the window for the process PowerShell.exe
-
-    #>
-    [OutputType('System.Automation.WindowInfo')]
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipelineByPropertyName=$True)]
-        $ProcessName
-    )
-    Begin {
-        Try{
-            [void][Window]
-        } Catch {
-        Add-Type @"
-              using System;
-              using System.Runtime.InteropServices;
-              public class Window {
-                [DllImport("user32.dll")]
-                [return: MarshalAs(UnmanagedType.Bool)]
-                public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-              }
-              public struct RECT
-              {
-                public int Left;        // x position of upper-left corner
-                public int Top;         // y position of upper-left corner
-                public int Right;       // x position of lower-right corner
-                public int Bottom;      // y position of lower-right corner
-              }
-"@
-        }
-    }
-    Process {
-        Get-Process -Name $ProcessName | ForEach {
-            $Handle = $_.MainWindowHandle
-            $Rectangle = New-Object RECT
-
-			$a = [tricks]::GetForegroundWindow()
-
-			$FrontmostProcess = (get-process | ? { $_.mainwindowhandle -eq $a }).ProcessName
-
-			If ($FrontmostProcess -eq $ProcessName) {
-				$Return = [Window]::GetWindowRect($Handle,[ref]$Rectangle)
-			} Else {
-				echo background
-			}
-
-            If ($Return) {
-                $TopLeft = New-Object System.Management.Automation.Host.Coordinates -ArgumentList $Rectangle.Left, $Rectangle.Top
-                $BottomRight = New-Object System.Management.Automation.Host.Coordinates -ArgumentList $Rectangle.Right, $Rectangle.Bottom
-                If ($Rectangle.Top -lt 0 -AND $Rectangle.LEft -lt 0) {
-                    Write-Warning "Window is minimized! Coordinates will not be accurate."
-                }
-                $Object = [pscustomobject]@{
-                    ProcessName = $ProcessName
-                    TopLeft = $TopLeft
-                    BottomRight = $BottomRight
-                }
-                $Object.PSTypeNames.insert(0,'System.Automation.WindowInfo')
-                $Object
-            }
-        }
-    }
-}
-While (1) {
-	Get-Process LeagueClientUx | Get-Window
-	Start-Sleep -Milliseconds ${timer}
-}
-`;
+var ipc = require('node-ipc');
 
 class WindowManager {
-  constructor(callback, timer = 100) {
+  constructor(callback, timer = 10) {
     this.state = {
       child: null,
       currentPosition: {
@@ -127,12 +20,33 @@ class WindowManager {
     };
   }
 
-  start() {
+  async start() {
     if (this.state.child == null) {
-      this.state.child = exec(getWindowScriptWindows(this.state.timer), {
-        'shell': 'powershell.exe'
+      var port = await getPort();
+      ipc.config.networkPort = port;
+      ipc.config.rawBuffer = true;
+      ipc.config.silent = true;
+      ipc.serveNet('127.0.0.1', port, () => {
+        ipc.server.on('data', (data, socket) => {
+          var [y1, x1, y2, x2] = data.toString().split(', ').map(val => Number(val));
+          var newPosition = {
+            widthHeight: [x2 - x1, y2 - y1],
+            topLeft: [x1, y1],
+            bottomRight: [x2, y2]
+          };
+          this.tryToUpdateBounds(this.verifyBounds(newPosition));
+        }); // ipc.server.on(
+        // 	'connect',
+        // 	(data, socket) => {
+        // 		console.log('connection has been made')
+        // 	}
+        // )
+
+        this.state.child = execFile('windowManagerHelper.exe', [port, this.state.timer], {
+          cwd: __dirname
+        });
       });
-      this.startWatching();
+      ipc.server.start();
     }
   }
 
@@ -145,6 +59,20 @@ class WindowManager {
 
   setCallback(callback) {
     this.state.callback = callback;
+  }
+
+  verifyBounds(bounds) {
+    var {
+      topLeft,
+      bottomRight,
+      widthHeight
+    } = bounds;
+
+    if (topLeft[0] < -1000 && topLeft[1] < -1000 && bottomRight[0] < -1000 && bottomRight[1] < -1000 || widthHeight[0] > 10000 || widthHeight[1] > 10000) {
+      return null;
+    } else {
+      return bounds;
+    }
   }
 
   tryToUpdateBounds(newPosition) {
