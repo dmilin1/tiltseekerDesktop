@@ -15,6 +15,8 @@ SocketManager::SocketManager(uint16_t port)
 
 SocketManager::~SocketManager()
 {
+	if (mSocket != INVALID_SOCKET)
+		closesocket(mSocket);
 	WSACleanup();
 }
 
