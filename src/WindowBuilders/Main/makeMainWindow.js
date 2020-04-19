@@ -12,8 +12,8 @@ const {
 } = require('./../../DataTransfer/dataTransfer.js');
 
 module.exports = function () {
-  settings = new Settings();
-  mainWindow = new BrowserWindow({
+  var settings = new Settings();
+  var mainWindow = new BrowserWindow({
     width: 550,
     height: 300,
     // backgroundColor: '#686868',
@@ -28,10 +28,10 @@ module.exports = function () {
     icon: '/../../Resources/Images/favicon.ico'
   });
   mainWindow.loadFile(path.join(__dirname, '/main.html'));
-  currentSettings = {
+  var currentSettings = {
     runAtStart: settings.get('runAtStart')
   };
-  dataTransfer = new ServerDataTransfer(mainWindow, 'mainWindow', {
+  var dataTransfer = new ServerDataTransfer(mainWindow, 'mainWindow', {
     exitPressed: data => {
       mainWindow.hide();
     },

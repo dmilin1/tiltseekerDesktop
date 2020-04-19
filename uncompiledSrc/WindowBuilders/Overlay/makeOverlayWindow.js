@@ -11,8 +11,8 @@ module.exports = async function(clientApi) {
 	var isShowing = false
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize
 
-	settings = new Settings()
-	overlayWindow = await new BrowserWindow({
+	var settings = new Settings()
+	var overlayWindow = await new BrowserWindow({
 		width: width,
 		height: height,
 		// backgroundColor: '#686868',
@@ -34,13 +34,15 @@ module.exports = async function(clientApi) {
 	overlayWindow.setVisibleOnAllWorkspaces(true);
 
 	ioHook.on('keydown', event => {
-		 if (event.keycode == 43) {
+		// console.log(String.fromCharCode(event.keycode))
+		 if (event.keycode == settings.get('hotkeyKeyCode')) {
 			 overlayWindow.show()
+			 console.log('derp')
 		 }
 	})
 
 	ioHook.on('keyup', event => {
-		 if (event.keycode == 43) {
+		 if (event.keycode == settings.get('hotkeyKeyCode')) {
 			 overlayWindow.hide()
 		 }
 	})
@@ -51,22 +53,18 @@ module.exports = async function(clientApi) {
 	loadGame = async () => {
 		username = (await clientApi.get('/lol-summoner/v1/current-summoner')).displayName
 		region = regionConvert[(await clientApi.get('/riotclient/get_region_locale')).region]
-		overlayWindow.loadURL(`http://localhost:3000/tiltseek?region=${region}&summonerName=${encodeURIComponent(username)}&desktop=true`)
+		overlayWindow.loadURL(`http://tiltseeker.com/tiltseek?region=${region}&summonerName=${encodeURIComponent(username)}&desktop=true`)
 		console.log('loading game')
 	}
 
 	clientApi.subscribe('/lol-gameflow/v1/gameflow-phase', async (phase) => {
-		console.log(phase.data)
-		if (phase.data == 'InProgress') {
+		console.log(phase)
+		if (phase == 'InProgress') {
 			loadGame()
 		}
 	})
 
 	// console.log(await clientApi.get('/lol-gameflow/v1/gameflow-phase'))
-
-	if (await clientApi.get('/lol-gameflow/v1/gameflow-phase') == 'InProgress') {
-		loadGame()
-	}
 
 
 

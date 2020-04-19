@@ -1,7 +1,7 @@
 {
   "name": "tiltseekerdesktop",
-  "productName": "tiltseekerdesktop",
-  "version": "1.0.0",
+  "productName": "Tiltseeker",
+  "version": "2.0.0",
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
@@ -59,6 +59,18 @@
           "name": "@electron-forge/maker-rpm",
           "config": {}
         }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "dmilin1",
+              "name": "tiltseekerDesktop"
+            },
+            "prerelease": true
+          }
+        }
       ]
     }
   },
@@ -73,6 +85,7 @@
     "iohook": "^0.6.5",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
+    "update-electron-app": "^1.5.0",
     "ws": "^7.2.1"
   },
   "devDependencies": {
@@ -85,6 +98,7 @@
     "@electron-forge/maker-rpm": "^6.0.0-beta.49",
     "@electron-forge/maker-squirrel": "^6.0.0-beta.49",
     "@electron-forge/maker-zip": "^6.0.0-beta.49",
+    "@electron-forge/publisher-github": "^6.0.0-beta.50",
     "electron": "8.0.1"
   }
 }

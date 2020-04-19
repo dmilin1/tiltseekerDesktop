@@ -13,7 +13,10 @@ const fs = require('fs');
 module.exports = (_temp = class Settings {
   constructor() {
     this.defaults = {
-      runAtStart: true
+      runAtStart: true,
+      hotkeyKeyCode: 12,
+      compensateForWinrate: false,
+      bestChampsOnly: false
     };
 
     this.setUnsetSettings = () => {

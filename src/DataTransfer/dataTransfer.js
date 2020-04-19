@@ -8,10 +8,6 @@ const {
 
 class ServerDataTransfer {
   constructor(window, name, listenerFunctions) {
-    this.send = (func, data) => {
-      this.state.window.webContents.send(this.state.name + '-window', [func, data]);
-    };
-
     this.state = {
       window: window,
       name: name
@@ -25,14 +21,14 @@ class ServerDataTransfer {
     });
   }
 
+  send(func, data) {
+    this.state.window.webContents.send(this.state.name + '-window', [func, data]);
+  }
+
 }
 
 class WindowDataTransfer {
   constructor(name, listenerFunctions) {
-    this.send = (func, data) => {
-      ipcRenderer.send(this.state.name + '-server', [func, data]);
-    };
-
     this.state = {
       name: name
     };
@@ -43,6 +39,10 @@ class WindowDataTransfer {
         console.log('FUNCTION DOES NOT EXIST');
       }
     });
+  }
+
+  send(func, data) {
+    ipcRenderer.send(this.state.name + '-server', [func, data]);
   }
 
 }

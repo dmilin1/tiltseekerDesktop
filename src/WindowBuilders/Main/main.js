@@ -34,6 +34,7 @@ class Settings extends React.Component {
     this.dataReceived = () => {
       return {
         settingsUpdate: data => {
+          console.log(data);
           this.setState({
             settingsData: data
           });

@@ -16,7 +16,7 @@ class ServerDataTransfer {
 		})
 	}
 
-	send = (func, data) => {
+	send(func, data) {
 		this.state.window.webContents.send(this.state.name + '-window', [func, data])
 	}
 }
@@ -35,7 +35,7 @@ class WindowDataTransfer {
 		})
 	}
 
-	send = (func, data) => {
+	send(func, data) {
 		ipcRenderer.send(this.state.name + '-server', [func, data])
 	}
 }

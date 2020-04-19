@@ -8,6 +8,9 @@ module.exports = class Settings {
 
 	defaults = {
 		runAtStart: true,
+		hotkeyKeyCode: 12,
+		compensateForWinrate: false,
+		bestChampsOnly: false,
 	}
 
 	constructor() {

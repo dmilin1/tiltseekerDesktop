@@ -44,6 +44,7 @@ class ClientApi {
 		} else {
 			this.state.subscriptions[api] = [callback]
 		}
+		this.get(api).then((res) => callback(res)).catch(err => {})
 	}
 
 	didConnect() {
@@ -99,7 +100,7 @@ class ClientApi {
 				msg = JSON.parse(msg)
 				if (this.state.subscriptions[msg[2].uri]) {
 					for (var func of this.state.subscriptions[msg[2].uri]) {
-						func(msg[2])
+						func(msg[2].data)
 					}
 				}
 			} catch {
@@ -120,10 +121,18 @@ class ClientApi {
 
 		return new Promise(async (resolve, reject) => {
 			if (this.state.connected) {
-				resolve(await theApiCall())
+				try {
+					resolve(await theApiCall())
+				} catch (err) {
+					reject(err)
+				}
 			} else {
 				this.state.apiCallsWaiting.push(async () => {
-					resolve(await theApiCall())
+					try {
+						resolve(await theApiCall())
+					} catch (err) {
+						reject(err)
+					}
 				})
 			}
 		})

@@ -1,6 +1,7 @@
 const { app, dialog, Menu, Tray } = require('electron')
 const makeMainWindow = require('./WindowBuilders/Main/makeMainWindow.js')
 const makeOverlayWindow = require('./WindowBuilders/Overlay/makeOverlayWindow.js')
+const makeChampSelectWindow = require('./WindowBuilders/ChampSelect/makeChampSelectWindow.js')
 const { ClientApi } = require('./Utilities/ClientApi.js')
 const path = require('path')
 
@@ -8,6 +9,11 @@ const path = require('path')
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
 	app.quit();
 }
+
+require('update-electron-app')({
+	repo: 'dmilin1/tiltseekerDesktop',
+  updateInterval: '10 minutes',
+})
 
 
 var mainWindow = null
@@ -25,6 +31,8 @@ if (!singleInstanceLock) {
 		clientApi = new ClientApi()
 		mainWindow = makeMainWindow(clientApi)
 		overlayWindow = makeOverlayWindow(clientApi)
+		champSelectWindow = makeChampSelectWindow(clientApi)
+
 
 		var contextMenu = Menu.buildFromTemplate([
 			{
