@@ -4,7 +4,6 @@ class WinRateCalc {
       champStats,
       matchups
     } = stats;
-    matchups = matchups.matchups;
     var teamChamps = Object.values(picksAndBans.allyTeam.picks).map(pick => {
       return pick.championId;
     });

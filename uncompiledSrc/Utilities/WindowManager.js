@@ -31,13 +31,17 @@ class WindowManager {
 					ipc.server.on(
 						'data',
 						(data, socket) => {
-							var [y1, x1, y2, x2] = data.toString().split(', ').map(val => Number(val))
-							var newPosition = {
-								widthHeight: [x2-x1, y2-y1],
-								topLeft: [x1, y1],
-								bottomRight: [x2, y2],
+							if (data.toString() === 'background') {
+								this.tryToUpdateBounds(null)
+							} else {
+								var [y1, x1, y2, x2] = data.toString().split(', ').map(val => Number(val))
+								var newPosition = {
+									widthHeight: [x2-x1, y2-y1],
+									topLeft: [x1, y1],
+									bottomRight: [x2, y2],
+								}
+								this.tryToUpdateBounds(this.verifyBounds(newPosition))
 							}
-							this.tryToUpdateBounds(this.verifyBounds(newPosition))
 						}
 					)
 					// ipc.server.on(

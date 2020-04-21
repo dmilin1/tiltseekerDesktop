@@ -66,7 +66,7 @@ module.exports = function() {
 		}
 	})
 
-	var updateCalculations = () => {
+	this.updateCalculations = () => {
 		var potentialPicks = this.state.championMasteries.map(champ => champ.championId)
 		dataTransfer.send('winRateData', winRateCalc.getWinRate(
 			this.state.picksAndBans,
@@ -96,10 +96,10 @@ module.exports = function() {
 			var height = bounds.widthHeight[1]*0.08
 			console.log(bounds)
 			champSelectWindow.setBounds({
-				x: bounds.topLeft[0],
-				y: bounds.topLeft[1] - height,
-				width: bounds.widthHeight[0],
-				height: height,
+				x: Math.round(bounds.topLeft[0]),
+				y: Math.round(bounds.topLeft[1] - height + 1),
+				width: Math.round(bounds.widthHeight[0]),
+				height: Math.round(height),
 			})
 			champSelectWindow.show()
 		}
@@ -140,7 +140,7 @@ module.exports = function() {
 					}
 				}
 			}
-			updateCalculations()
+			this.updateCalculations()
 		}
 	})
 
