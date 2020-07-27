@@ -8,9 +8,18 @@ module.exports = class Settings {
 
 	defaults = {
 		runAtStart: true,
-		hotkeyKeyCode: 12,
 		compensateForWinrate: false,
 		bestChampsOnly: false,
+		hotkeyIsToggle: false,
+		hotkey: {
+			shiftKey: false,
+			altKey: false,
+			ctrlKey: false,
+			metaKey: false,
+			keycode: 12,
+			rawcode: 189,
+			type: 'keydown'
+		},
 	}
 
 	constructor() {
@@ -36,6 +45,10 @@ module.exports = class Settings {
 			this.runAtStart(val)
 		}
 		return this.store.set(key, val)
+	}
+
+	getCurrentSettings = () => {
+		return this.store.store
 	}
 
 	runAtStart = (val) => {

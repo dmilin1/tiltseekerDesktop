@@ -10,6 +10,8 @@ const {
   WindowDataTransfer
 } = require('./../../DataTransfer/dataTransfer.js');
 
+const keycodeToName = require('../../Utilities/KeycodeToName');
+
 const {
   FontAwesomeIcon
 } = require('@fortawesome/react-fontawesome');
@@ -34,12 +36,16 @@ class Settings extends React.Component {
     this.dataReceived = () => {
       return {
         settingsUpdate: data => {
-          console.log(data);
           this.setState({
             settingsData: data
           });
+          this.hotkeyInput.blur();
         }
       };
+    };
+
+    this.getHotkey = () => {
+      this.state.dataTransfer.send('getHotkey');
     };
 
     this.exitPressed = () => {
@@ -48,6 +54,10 @@ class Settings extends React.Component {
 
     this.toggleRunAtStart = () => {
       this.state.dataTransfer.send('toggleRunAtStart');
+    };
+
+    this.toggleHotkeyIsToggle = () => {
+      this.state.dataTransfer.send('toggleHotkeyIsToggle');
     };
 
     this.state = {
@@ -73,6 +83,26 @@ class Settings extends React.Component {
       icon: faToggleOn
     }) : React.createElement(FontAwesomeIcon, {
       icon: faToggleOff
+    })), React.createElement("div", {
+      className: css(styles.runAtStart),
+      onClick: () => {
+        this.toggleHotkeyIsToggle();
+      }
+    }, 'Overlay Hotkey is Toggle: ', this.state.settingsData.hotkeyIsToggle ? React.createElement(FontAwesomeIcon, {
+      icon: faToggleOn
+    }) : React.createElement(FontAwesomeIcon, {
+      icon: faToggleOff
+    })), React.createElement("div", {
+      className: css(styles.hotkeyContainer)
+    }, 'Hotkey: ', React.createElement("input", {
+      className: css(styles.hotkeyInput),
+      ref: me => this.hotkeyInput = me,
+      value: keycodeToName(this.state.settingsData.hotkey.rawcode) + (this.state.settingsData.hotkey.shiftKey ? ' + shift' : '') + (this.state.settingsData.hotkey.altKey ? ' + alt' : '') + (this.state.settingsData.hotkey.ctrlKey ? ' + ctrl' : '') + (this.state.settingsData.hotkey.metaKey ? ' + meta' : ''),
+      onFocus: () => {
+        this.getHotkey();
+      },
+      onBlur: () => {// ioHook.stop()
+      }
     })))) : null), React.createElement("div", {
       className: css(styles.exitButton),
       onClick: this.exitPressed
@@ -137,6 +167,7 @@ const styles = StyleSheet.create({
   },
   settingsContainer: {
     display: 'flex',
+    flexDirection: 'column',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'space-evenly'
@@ -147,6 +178,41 @@ const styles = StyleSheet.create({
     color: '#0C0C0C',
     WebkitAppRegion: 'no-drag',
     cursor: 'pointer'
+  },
+  hotkeyContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: 25,
+    fontFamily: 'Roboto-Regular',
+    color: '#0C0C0C'
+  },
+  hotkeyInput: {
+    WebkitAppRegion: 'no-drag',
+    height: 25,
+    width: 230,
+    marginBottom: -2,
+    marginLeft: 12,
+    textAlign: 'center',
+    color: 'white',
+    backgroundColor: '#333',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: '#DDD',
+    outline: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 0.25s, border-color 0.25s, color 0.25s',
+    ':focus': {
+      borderColor: '#151515',
+      backgroundColor: '#333'
+    },
+    ':hover': {
+      borderColor: '#151515',
+      backgroundColor: '#333'
+    },
+    '::selection': {
+      backgroundColor: '#CCC'
+    }
   }
 });
 const domContainer = document.querySelector('#root');

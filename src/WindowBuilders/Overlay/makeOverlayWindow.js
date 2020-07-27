@@ -16,13 +16,12 @@ const {
 } = require('./../../constants.js');
 
 module.exports = async function (clientApi) {
-  var isShowing = false;
   const {
     width,
     height
   } = screen.getPrimaryDisplay().workAreaSize;
   var settings = new Settings();
-  var overlayWindow = await new BrowserWindow({
+  var overlayWindow = new BrowserWindow({
     width: width,
     height: height,
     // backgroundColor: '#686868',
@@ -41,16 +40,27 @@ module.exports = async function (clientApi) {
   });
   overlayWindow.setAlwaysOnTop(true, "floating");
   overlayWindow.setVisibleOnAllWorkspaces(true);
+
+  var isHotkey = event => {
+    return event.rawcode == settings.get('hotkey').rawcode && event.shiftKey == settings.get('hotkey').shiftKey && event.altKey == settings.get('hotkey').altKey && event.ctrlKey == settings.get('hotkey').ctrlKey && event.metaKey == settings.get('hotkey').metaKey;
+  };
+
   ioHook.on('keydown', event => {
-    // console.log(String.fromCharCode(event.keycode))
-    if (event.keycode == settings.get('hotkeyKeyCode')) {
-      overlayWindow.show();
-      console.log('derp');
+    if (isHotkey(event)) {
+      if (settings.get('hotkeyIsToggle') && overlayWindow.isVisible()) {
+        overlayWindow.hide();
+      } else {
+        overlayWindow.show();
+      }
+
+      console.log('hotkey pressed');
     }
   });
   ioHook.on('keyup', event => {
-    if (event.keycode == settings.get('hotkeyKeyCode')) {
-      overlayWindow.hide();
+    if (event.rawcode == settings.get('hotkey').rawcode) {
+      if (!settings.get('hotkeyIsToggle')) {
+        overlayWindow.hide();
+      }
     }
   });
   ioHook.start();
@@ -58,8 +68,9 @@ module.exports = async function (clientApi) {
   loadGame = async () => {
     username = (await clientApi.get('/lol-summoner/v1/current-summoner')).displayName;
     region = regionConvert[(await clientApi.get('/riotclient/get_region_locale')).region];
-    overlayWindow.loadURL(`http://tiltseeker.com/tiltseek?region=${region}&summonerName=${encodeURIComponent(username)}&desktop=true`);
+    overlayWindow.loadURL(`https://tiltseeker.com/tiltseek?region=${region}&summonerName=${encodeURIComponent(username)}&desktop=true`);
     console.log('loading game');
+    console.log(`https://tiltseeker.com/tiltseek?region=${region}&summonerName=${encodeURIComponent(username)}&desktop=true`);
   };
 
   clientApi.subscribe('/lol-gameflow/v1/gameflow-phase', async phase => {
@@ -68,8 +79,7 @@ module.exports = async function (clientApi) {
     if (phase == 'InProgress') {
       loadGame();
     }
-  }); // console.log(await clientApi.get('/lol-gameflow/v1/gameflow-phase'))
-
+  });
   overlayWindow.on('minimize', event => {
     event.preventDefault();
     overlayWindow.hide();
@@ -81,12 +91,6 @@ module.exports = async function (clientApi) {
     }
 
     return false;
-  });
-  overlayWindow.on('show', event => {
-    isShowing = true;
-  });
-  overlayWindow.on('hide', event => {
-    isShowing = false;
   });
   return overlayWindow;
 };

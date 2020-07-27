@@ -14,9 +14,18 @@ module.exports = (_temp = class Settings {
   constructor() {
     this.defaults = {
       runAtStart: true,
-      hotkeyKeyCode: 12,
       compensateForWinrate: false,
-      bestChampsOnly: false
+      bestChampsOnly: false,
+      hotkeyIsToggle: false,
+      hotkey: {
+        shiftKey: false,
+        altKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        keycode: 12,
+        rawcode: 189,
+        type: 'keydown'
+      }
     };
 
     this.setUnsetSettings = () => {
@@ -37,6 +46,10 @@ module.exports = (_temp = class Settings {
       }
 
       return this.store.set(key, val);
+    };
+
+    this.getCurrentSettings = () => {
+      return this.store.store;
     };
 
     this.runAtStart = val => {

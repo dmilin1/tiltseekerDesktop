@@ -66,14 +66,24 @@ module.exports = function() {
 		}
 	})
 
-	this.updateCalculations = () => {
+
+	this.updateCalculations = async () => {
+
 		var potentialPicks = this.state.championMasteries.map(champ => champ.championId)
-		dataTransfer.send('winRateData', winRateCalc.getWinRate(
+
+
+		if (settings.get('bestChampsOnly')) {
+			potentialPicks = potentialPicks.slice(0, 20)
+		}
+		
+		var calculations = winRateCalc.getWinRate(
 			this.state.picksAndBans,
 			this.state.stats,
 			this.state.localPlayerCellId,
 			potentialPicks,
-		))
+			settings.get('compensateForWinrate'),
+		)
+		dataTransfer.send('winRateData', calculations)
 	}
 
 	var resetPicksAndBans = () => {
@@ -87,6 +97,9 @@ module.exports = function() {
 				bans: {},
 			}
 		}
+		console.log('picks and bans reset')
+		console.log(this.state.picksAndBans.allyTeam)
+		console.log(this.state.picksAndBans.opponentTeam)
 	}
 
 	windowManager.setCallback((bounds) => {
@@ -94,7 +107,6 @@ module.exports = function() {
 			champSelectWindow.hide()
 		} else {
 			var height = bounds.widthHeight[1]*0.08
-			console.log(bounds)
 			champSelectWindow.setBounds({
 				x: Math.round(bounds.topLeft[0]),
 				y: Math.round(bounds.topLeft[1] - height + 1),
@@ -108,6 +120,7 @@ module.exports = function() {
 
 	clientApi.subscribe('/lol-gameflow/v1/gameflow-phase', async (phase) => {
 		resetPicksAndBans()
+		dataTransfer.send('winRateData', null)
 		if (phase == 'ChampSelect') {
 			this.state.stats = (await axios.get('https://tiltseeker.com/api/na/stats')).data
 
@@ -116,6 +129,7 @@ module.exports = function() {
 
 			this.state.inChampSelect = true
 			windowManager.start()
+			// champSelectWindow.show()
 		} else {
 			this.state.inChampSelect = false
 			champSelectWindow.hide()
