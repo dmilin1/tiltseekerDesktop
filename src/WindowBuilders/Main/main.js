@@ -60,6 +60,10 @@ class Settings extends React.Component {
       this.state.dataTransfer.send('toggleHotkeyIsToggle');
     };
 
+    this.setBestChampsLimit = num => {
+      this.state.dataTransfer.send('setBestChampsLimit', num);
+    };
+
     this.state = {
       dataTransfer: new WindowDataTransfer('mainWindow', this.dataReceived()),
       settingsData: null
@@ -92,6 +96,12 @@ class Settings extends React.Component {
       icon: faToggleOn
     }) : React.createElement(FontAwesomeIcon, {
       icon: faToggleOff
+    })), React.createElement("div", {
+      className: css(styles.bestChampsLimitContainer)
+    }, 'Best Champs Limit: ', React.createElement("input", {
+      className: css(styles.bestChampsLimitInput),
+      value: this.state.settingsData.bestChampsLimit,
+      onChange: e => this.setBestChampsLimit(e.target.value)
     })), React.createElement("div", {
       className: css(styles.hotkeyContainer)
     }, 'Hotkey: ', React.createElement("input", {
@@ -187,6 +197,41 @@ const styles = StyleSheet.create({
     color: '#0C0C0C'
   },
   hotkeyInput: {
+    WebkitAppRegion: 'no-drag',
+    height: 25,
+    width: 230,
+    marginBottom: -2,
+    marginLeft: 12,
+    textAlign: 'center',
+    color: 'white',
+    backgroundColor: '#333',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: '#DDD',
+    outline: 'none',
+    cursor: 'pointer',
+    transition: 'background-color 0.25s, border-color 0.25s, color 0.25s',
+    ':focus': {
+      borderColor: '#151515',
+      backgroundColor: '#333'
+    },
+    ':hover': {
+      borderColor: '#151515',
+      backgroundColor: '#333'
+    },
+    '::selection': {
+      backgroundColor: '#CCC'
+    }
+  },
+  bestChampsLimitContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: 25,
+    fontFamily: 'Roboto-Regular',
+    color: '#0C0C0C'
+  },
+  bestChampsLimitInput: {
     WebkitAppRegion: 'no-drag',
     height: 25,
     width: 230,

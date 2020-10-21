@@ -73,7 +73,7 @@ module.exports = function() {
 
 
 		if (settings.get('bestChampsOnly')) {
-			potentialPicks = potentialPicks.slice(0, 20)
+			potentialPicks = potentialPicks.slice(0, settings.get('bestChampsLimit'))
 		}
 		
 		var calculations = winRateCalc.getWinRate(

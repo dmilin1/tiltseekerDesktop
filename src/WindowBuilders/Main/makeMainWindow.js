@@ -16,8 +16,8 @@ const {
 module.exports = function () {
   var settings = new Settings();
   var mainWindow = new BrowserWindow({
-    width: 550,
-    height: 380,
+    width: 650,
+    height: 420,
     // backgroundColor: '#686868',
     fullscreenable: false,
     maximizable: false,
@@ -41,6 +41,10 @@ module.exports = function () {
     },
     toggleHotkeyIsToggle: () => {
       settings.set('hotkeyIsToggle', !settings.get('hotkeyIsToggle'));
+      dataTransfer.send('settingsUpdate', settings.getCurrentSettings());
+    },
+    setBestChampsLimit: num => {
+      settings.set('bestChampsLimit', Number(num) || 0);
       dataTransfer.send('settingsUpdate', settings.getCurrentSettings());
     },
     getHotkey: () => {

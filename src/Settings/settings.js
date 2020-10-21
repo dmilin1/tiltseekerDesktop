@@ -16,6 +16,7 @@ module.exports = (_temp = class Settings {
       runAtStart: true,
       compensateForWinrate: false,
       bestChampsOnly: false,
+      bestChampsLimit: 20,
       hotkeyIsToggle: false,
       hotkey: {
         shiftKey: false,

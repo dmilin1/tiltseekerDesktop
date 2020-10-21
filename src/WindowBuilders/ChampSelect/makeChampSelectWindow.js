@@ -79,7 +79,7 @@ module.exports = function () {
     var potentialPicks = this.state.championMasteries.map(champ => champ.championId);
 
     if (settings.get('bestChampsOnly')) {
-      potentialPicks = potentialPicks.slice(0, 20);
+      potentialPicks = potentialPicks.slice(0, settings.get('bestChampsLimit'));
     }
 
     var calculations = winRateCalc.getWinRate(this.state.picksAndBans, this.state.stats, this.state.localPlayerCellId, potentialPicks, settings.get('compensateForWinrate'));

@@ -18,7 +18,7 @@ class Settings extends React.Component {
 			settingsData: null,
 		}
 		this.state.dataTransfer.send('requestSettings')
-  }
+	}
 
 	dataReceived = () => { return {
 		settingsUpdate: (data) => {
@@ -41,6 +41,10 @@ class Settings extends React.Component {
 
 	toggleHotkeyIsToggle = () => {
 		this.state.dataTransfer.send('toggleHotkeyIsToggle')
+	}
+
+	setBestChampsLimit = (num) => {
+		this.state.dataTransfer.send('setBestChampsLimit', num)
 	}
 
 	render() {
@@ -81,6 +85,17 @@ class Settings extends React.Component {
 									) : (
 										<FontAwesomeIcon icon={faToggleOff}/>
 									)}
+								</div>
+
+								<div
+									className={css(styles.bestChampsLimitContainer)}
+								>
+									{'Best Champs Limit: '}
+									<input
+										className={css(styles.bestChampsLimitInput)}
+										value={this.state.settingsData.bestChampsLimit}
+										onChange={(e) => this.setBestChampsLimit(e.target.value)}
+									/>
 								</div>
 
 								<div
@@ -225,6 +240,41 @@ const styles = StyleSheet.create({
 			backgroundColor: '#CCC',
 		},
 	},
+	bestChampsLimitContainer: {
+		display: 'flex',
+		alignItems: 'center',
+		fontSize: 25,
+		fontFamily: 'Roboto-Regular',
+		color: '#0C0C0C',
+	},
+	bestChampsLimitInput: {
+		WebkitAppRegion: 'no-drag',
+		height: 25,
+		width: 230,
+		marginBottom: -2,
+		marginLeft: 12,
+		textAlign: 'center',
+		color: 'white',
+		backgroundColor: '#333',
+		borderRadius: 10,
+		borderWidth: 2,
+		borderStyle: 'solid',
+		borderColor: '#DDD',
+		outline: 'none',
+		cursor: 'pointer',
+		transition: 'background-color 0.25s, border-color 0.25s, color 0.25s',
+		':focus': {
+			borderColor: '#151515',
+			backgroundColor: '#333',
+		},
+		':hover': {
+			borderColor: '#151515',
+			backgroundColor: '#333',
+		},
+		'::selection': {
+			backgroundColor: '#CCC',
+		},
+	}
 })
 
 

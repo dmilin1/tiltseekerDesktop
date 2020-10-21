@@ -10,6 +10,7 @@ module.exports = class Settings {
 		runAtStart: true,
 		compensateForWinrate: false,
 		bestChampsOnly: false,
+		bestChampsLimit: 20,
 		hotkeyIsToggle: false,
 		hotkey: {
 			shiftKey: false,
