@@ -1,7 +1,7 @@
 {
   "name": "tiltseekerdesktop",
   "productName": "Tiltseeker",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "My Electron application description",
   "main": "src/index.js",
   "scripts": {
