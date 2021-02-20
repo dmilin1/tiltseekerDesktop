@@ -36,7 +36,8 @@ module.exports = function () {
     localPlayerCellId: null,
     championMasteries: null,
     stats: null,
-    inChampSelect: false
+    inChampSelect: false,
+    champSelectStage: 'pick'
   };
   var settings = new Settings();
   var windowManager = new WindowManager();
@@ -65,18 +66,47 @@ module.exports = function () {
       var settingName = arr[0];
       var settingData = arr[1];
       settings.set(settingName, settingData);
+      this.updateSettings();
       this.updateCalculations();
     },
     requestSettings: () => {
-      dataTransfer.send('settingsUpdate', {
-        compensateForWinrate: settings.get('compensateForWinrate'),
-        bestChampsOnly: settings.get('bestChampsOnly')
-      });
+      this.updateSettings();
     }
   });
 
+  this.updateSettings = async () => {
+    dataTransfer.send('settingsUpdate', {
+      compensateForWinrate: settings.get('compensateForWinrate'),
+      bestChampsOnly: settings.get('bestChampsOnly'),
+      lanesToShow: settings.get('lanesToShow')
+    });
+  };
+
+  this.setStage = stage => {
+    stage = stage == 'ban' ? 'bans' : 'picks';
+
+    if (this.state.champSelectStage != stage) {
+      this.state.champSelectStage = stage;
+      dataTransfer.send('setStage', stage);
+    }
+  };
+
   this.updateCalculations = async () => {
     var potentialPicks = this.state.championMasteries.map(champ => champ.championId);
+
+    if (settings.get('bestChampsWhitelist').length > 0) {
+      potentialPicks = potentialPicks.filter(pick => settings.get('bestChampsWhitelist').includes(pick));
+    }
+
+    if (settings.get('lanesToShow').length < 5) {
+      potentialPicks = potentialPicks.filter(pick => {
+        for (var lane of settings.get('lanesToShow')) {
+          if (this.state.champStats[pick]?.lanes[lane] > 0.15) {
+            return true;
+          }
+        }
+      });
+    }
 
     if (settings.get('bestChampsOnly')) {
       potentialPicks = potentialPicks.slice(0, settings.get('bestChampsLimit'));
@@ -84,6 +114,7 @@ module.exports = function () {
 
     var calculations = winRateCalc.getWinRate(this.state.picksAndBans, this.state.stats, this.state.localPlayerCellId, potentialPicks, settings.get('compensateForWinrate'));
     dataTransfer.send('winRateData', calculations);
+    dataTransfer.send('influenceRateData', this.state.influenceRates);
   };
 
   var resetPicksAndBans = () => {
@@ -122,6 +153,10 @@ module.exports = function () {
 
     if (phase == 'ChampSelect') {
       this.state.stats = (await axios.get('https://tiltseeker.com/api/na/stats')).data;
+      this.state.champStats = this.state.stats.champStats.reduce((accum, curr) => Object.assign(accum, {
+        [curr['_id']]: curr
+      }), {});
+      this.state.influenceRates = winRateCalc.getInfluenceRates(this.state.stats);
       var summonerId = (await clientApi.get('/lol-login/v1/session')).summonerId;
       this.state.championMasteries = await clientApi.get(`/lol-collections/v1/inventories/${summonerId}/champion-mastery`);
       this.state.inChampSelect = true;
@@ -146,6 +181,10 @@ module.exports = function () {
               championId: action.championId,
               completed: action.completed
             };
+          }
+
+          if (action.isInProgress) {
+            this.setStage(action.type);
           }
         }
       }

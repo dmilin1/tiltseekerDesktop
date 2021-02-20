@@ -17,7 +17,8 @@ const {
 const {
   faToggleOn,
   faToggleOff,
-  faTimes
+  faTimes,
+  faArrowLeft
 } = require('@fortawesome/free-solid-svg-icons'); // const backgroundImg = require('./Resources/Images/background.png')
 
 
@@ -39,13 +40,22 @@ class ChampSelect extends React.Component {
         settingsUpdate: data => {
           this.setState({
             compensateForWinrate: data.compensateForWinrate,
-            bestChampsOnly: data.bestChampsOnly
+            bestChampsOnly: data.bestChampsOnly,
+            lanesToShow: data.lanesToShow
           });
         },
         winRateData: data => {
           this.setState({
             winRateData: data
           });
+        },
+        influenceRateData: data => {
+          this.setState({
+            influenceRateData: data
+          });
+        },
+        setStage: data => {
+          this.setStage(data);
         }
       };
     };
@@ -54,13 +64,32 @@ class ChampSelect extends React.Component {
       this.state.dataTransfer.send('setSetting', [name, data]);
     };
 
+    this.setStage = stage => {
+      this.oldStage = this.state.stage;
+      this.setState({
+        stage
+      });
+    };
+
+    this.prevStage = () => {
+      var tempStage = this.oldStage;
+      this.oldStage = this.state.stage;
+      this.setState({
+        stage: tempStage
+      });
+    };
+
     this.state = {
       dataTransfer: new WindowDataTransfer('champSelectWindow', this.dataReceived()),
       compensateForWinrate: false,
       bestChampsOnly: false,
+      lanesToShow: [],
       winRateData: null,
+      influenceRateData: null,
       version: null,
-      championData: null
+      championData: null,
+      stage: 'picks' // can also be bans or settings
+
     };
     this.state.dataTransfer.send('requestSettings');
   }
@@ -85,27 +114,37 @@ class ChampSelect extends React.Component {
   }
 
   render() {
-    var champList = this.state.winRateData ? Object.entries(this.state.winRateData.options).map(arr => {
-      return [`https://ddragon.leagueoflegends.com/cdn/${this.state.version}/img/champion/${this.state.championData[arr[0]].id}.png`, arr[1].probability];
-    }).sort((a, b) => {
-      return b[1] - a[1];
-    }) : [];
+    var champList = [];
+
+    if (this.state.stage == 'picks' && this.state.winRateData) {
+      champList = Object.entries(this.state.winRateData.options).map(arr => [`https://ddragon.leagueoflegends.com/cdn/${this.state.version}/img/champion/${this.state.championData[arr[0]].id}.png`, arr[1].probability]).sort((a, b) => {
+        return b[1] - a[1];
+      });
+    } else if (this.state.stage == 'bans' && this.state.influenceRateData) {
+      champList = Object.entries(this.state.influenceRateData).map(arr => [`https://ddragon.leagueoflegends.com/cdn/${this.state.version}/img/champion/${this.state.championData[arr[0]].id}.png`, arr[1].influence / 10000]).sort((a, b) => {
+        return b[1] - a[1];
+      });
+    }
+
     return React.createElement("div", {
       className: css(styles.body)
     }, React.createElement("img", {
       className: css(styles.backgroundImg),
-      src: './Resources/Images/background.png'
-    }), React.createElement("div", {
+      src: `./Resources/Images/${this.state.stage == 'bans' ? 'background_bans' : 'background'}.png`
+    }), this.state.stage == 'settings' ? React.createElement(Settings, {
+      prevStage: this.prevStage,
+      setSetting: this.setSetting,
+      bestChampsOnly: this.state.bestChampsOnly,
+      lanesToShow: this.state.lanesToShow
+    }) : React.createElement(React.Fragment, null, React.createElement("div", {
       className: css(styles.edgeText)
-    }, 'BEST', React.createElement("br", null), 'PICKS'), React.createElement(Champions, {
-      data: champList.slice(0, 5)
+    }, 'BEST', React.createElement("br", null), this.state.stage == 'bans' ? 'BANS' : 'PICKS'), React.createElement(Champions, {
+      data: champList.slice(0, 5),
+      stage: this.state.stage
     }), React.createElement(CheckBox, {
       text: "Compensate For Champion Winrate",
       value: this.state.compensateForWinrate,
       onClick: val => {
-        this.setState({
-          compensateForWinrate: val
-        });
         this.setSetting('compensateForWinrate', val);
       }
     }), React.createElement("div", {
@@ -121,19 +160,67 @@ class ChampSelect extends React.Component {
         color: '#BE0000'
       }
     }, this.state.winRateData ? ((1 - this.state.winRateData.probability) * 100).toFixed(1) + '%' : '50.0%'), React.createElement(CheckBox, {
-      text: "Suggest My Best Champions Only",
+      text: "More Settings",
       value: this.state.bestChampsOnly,
+      noCheckBox: true,
       onClick: val => {
-        this.setState({
-          bestChampsOnly: val
-        });
-        this.setSetting('bestChampsOnly', val);
+        this.setStage('settings');
       }
     }), React.createElement(Champions, {
-      data: champList.slice(champList.length - 5, champList.length)
+      data: champList.slice(champList.length - 5, champList.length),
+      stage: this.state.stage
     }), React.createElement("div", {
       className: css(styles.edgeText)
-    }, 'WORST', React.createElement("br", null), 'PICKS'));
+    }, 'WORST', React.createElement("br", null), this.state.stage == 'bans' ? 'BANS' : 'PICKS')));
+  }
+
+}
+
+class Settings extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return React.createElement(React.Fragment, null, React.createElement(CheckBox, {
+      text: React.createElement(FontAwesomeIcon, {
+        icon: faArrowLeft
+      }),
+      value: this.props.bestChampsOnly,
+      noCheckBox: true,
+      textStyle: {
+        fontSize: '70vh'
+      },
+      onClick: val => {
+        this.props.prevStage();
+      }
+    }), React.createElement(CheckBox, {
+      text: "Suggest My Best Champions Only",
+      value: this.props.bestChampsOnly,
+      onClick: val => {
+        this.props.setSetting('bestChampsOnly', val);
+      }
+    }), ['top', 'jungle', 'middle', 'bottom', 'support'].map(pos => React.createElement(CheckBox, {
+      text: React.createElement("img", {
+        className: css(styles.laneImg),
+        src: `./Resources/Images/lanes/${pos}.webp`
+      }),
+      value: this.props.lanesToShow.includes(pos),
+      noCheckBox: true,
+      textStyle: {
+        fontSize: '80vh'
+      },
+      imageStyle: {
+        filter: this.props.lanesToShow.includes(pos) ? 'brightness(100%)' : 'brightness(25%)'
+      },
+      onClick: val => {
+        if (this.props.lanesToShow.includes(pos)) {
+          this.props.setSetting('lanesToShow', this.props.lanesToShow.filter(lane => lane != pos));
+        } else {
+          this.props.setSetting('lanesToShow', this.props.lanesToShow.concat([pos]));
+        }
+      }
+    })));
   }
 
 }
@@ -146,12 +233,16 @@ class CheckBox extends React.Component {
   render() {
     return React.createElement("div", {
       className: css(styles.checkBoxContainer),
+      style: Object.assign({}, this.props.imageStyle),
       onClick: () => this.props.onClick(!this.props.value)
-    }, React.createElement("img", {
+    }, !this.props.noCheckBox ? React.createElement("img", {
       className: css(styles.checkBoxImg),
       src: this.props.value ? './Resources/Images/checked.png' : './Resources/Images/unchecked.png'
-    }), React.createElement("div", {
-      className: css(styles.checkBoxText)
+    }) : null, React.createElement("div", {
+      className: css(styles.checkBoxText),
+      style: Object.assign({
+        fontSize: '24vh'
+      }, this.props.textStyle)
     }, this.props.text));
   }
 
@@ -175,7 +266,7 @@ class Champions extends React.Component {
       src: arr[0]
     })), React.createElement("div", {
       className: css(styles.championWinRateText)
-    }, (arr[1] * 100).toFixed(1) + '%'))));
+    }, (this.props.stage == 'bans' && arr[1] >= 0 ? '+' : '') + (arr[1] * 100).toFixed(this.props.stage == 'bans' ? 2 : 1) + '%'))));
   }
 
 }
@@ -273,8 +364,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     textAlign: 'center',
-    fontSize: '24vh',
-    width: '200vh'
+    width: '200vh',
+    ':hover': {
+      color: '#c9c6b5'
+    }
+  },
+  laneImg: {
+    width: '60vh',
+    height: '60vh',
+    ':hover': {
+      filter: 'contrast(150%)'
+    }
   }
 });
 const domContainer = document.querySelector('#root');

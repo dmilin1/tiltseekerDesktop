@@ -16,6 +16,8 @@ module.exports = (_temp = class Settings {
       runAtStart: true,
       compensateForWinrate: false,
       bestChampsOnly: false,
+      bestChampsWhitelist: [],
+      lanesToShow: ['top', 'jungle', 'middle', 'bottom', 'support'],
       bestChampsLimit: 20,
       hotkeyIsToggle: false,
       hotkey: {

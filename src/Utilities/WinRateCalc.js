@@ -86,9 +86,9 @@ class WinRateCalc {
       }
     }
 
-    probabilities = probabilities.filter(val => !isNaN(val));
-    console.log(probabilities.reduce((a, b) => a + (b - 0.5), 0));
-    console.log(probabilities);
+    probabilities = probabilities.filter(val => !isNaN(val)); // console.log(probabilities.reduce((a,b) => a + (b - 0.5), 0))
+    // console.log(probabilities)
+
     return {
       // probability: probabilities.reduce((a,b) => a + b, 0)/probabilities.length,
       probability: this.normalize(probabilities.reduce((a, b) => a + (b - 0.5), 0) / ((teamChamps.length + opponentChamps.length) / 2)),
@@ -99,9 +99,9 @@ class WinRateCalc {
   getWinRate(picksAndBans, stats, localPlayerCellId, potentialPicks, compensateForWinrate) {
     var returnObj = { ...this.calcProbability(picksAndBans, stats, compensateForWinrate),
       options: {}
-    };
-    console.log(picksAndBans);
-    console.log(returnObj.probability);
+    }; // console.log(picksAndBans)
+    // console.log(returnObj.probability)
+
     potentialPicks.forEach(champId => {
       var modifiedPicksAndBans = JSON.parse(JSON.stringify(picksAndBans)); // the JSON stuff quickly makes a deep copy
 
@@ -112,6 +112,26 @@ class WinRateCalc {
       returnObj.options[champId] = this.calcProbability(modifiedPicksAndBans, stats, compensateForWinrate);
     });
     return returnObj;
+  }
+
+  getInfluenceRates(stats) {
+    var {
+      champStats,
+      matchups
+    } = stats;
+    var totalMatches = champStats.reduce((sum, champ) => sum + champ.count, 0) / 10;
+    var results = {};
+
+    for (var champ of champStats) {
+      results[champ._id] = {
+        influence: 10000 * (champ.winRateAvg - 0.5) * (champ.pickRateAvg ?? champ.count / totalMatches) / (1 - (champ.banRateAvg ?? 0)),
+        pickRate: champ.pickRateAvg ?? champ.count / totalMatches,
+        winRate: champ.winRateAvg,
+        banRate: champ.banRateAvg ?? '?'
+      };
+    }
+
+    return results;
   }
 
 }

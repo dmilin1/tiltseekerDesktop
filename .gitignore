@@ -88,3 +88,6 @@ typings/
 
 # Electron-Forge
 out/
+
+# src folder because uncompiledSrc is really the source files
+src/
