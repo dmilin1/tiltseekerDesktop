@@ -114,7 +114,11 @@ class WindowManager {
 			changed = true
 		}
 		if (changed) {
-			if (this.state.currentPosition.bottomRight[0] === null) {
+			if (
+				this.state.currentPosition.widthHeight[0] == null ||
+				this.state.currentPosition.topLeft[0] == null ||
+				this.state.currentPosition.bottomRight[0] == null
+			) {
 				this.state.callback(null)
 			} else {
 				this.state.callback(this.state.currentPosition)
