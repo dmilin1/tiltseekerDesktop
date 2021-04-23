@@ -1,0 +1,23 @@
+{
+    "name": "electron-overlay",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "install": "node-gyp rebuild",
+        "compile": "node-gyp rebuild",
+        "build": "node-gyp rebuild"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "node-addon-api": "^3.1.0",
+        "node-gyp": "^7.1.2"
+    },
+    "devDependencies": {
+        "@types/node": "^14.14.20",
+        "electron-rebuild": "^2.3.4"
+    }
+}

@@ -1,3 +1,7 @@
+const {
+  Settings
+} = require('../Settings/settings');
+
 class WinRateCalc {
   normalize(x) {
     return x / (1 + Math.abs(5 * x)) + 0.5;
