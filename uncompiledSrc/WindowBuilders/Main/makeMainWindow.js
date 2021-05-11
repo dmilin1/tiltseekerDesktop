@@ -35,6 +35,10 @@ module.exports = function() {
 			settings.set('runAtStart', !settings.get('runAtStart'))
 			dataTransfer.send('settingsUpdate', settings.getCurrentSettings())
 		},
+		toggleEnableOverlay: () => {
+			settings.set('enableOverlay', !settings.get('enableOverlay'))
+			dataTransfer.send('settingsUpdate', settings.getCurrentSettings())
+		},
 		toggleHotkeyIsToggle: () => {
 			settings.set('hotkeyIsToggle', !settings.get('hotkeyIsToggle'))
 			dataTransfer.send('settingsUpdate', settings.getCurrentSettings())

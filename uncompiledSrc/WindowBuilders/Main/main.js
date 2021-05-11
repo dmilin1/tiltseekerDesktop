@@ -39,6 +39,10 @@ class Settings extends React.Component {
 		this.state.dataTransfer.send('toggleRunAtStart')
 	}
 
+	toggleEnableOverlay = () => {
+		this.state.dataTransfer.send('toggleEnableOverlay')
+	}
+
 	toggleHotkeyIsToggle = () => {
 		this.state.dataTransfer.send('toggleHotkeyIsToggle')
 	}
@@ -73,6 +77,20 @@ class Settings extends React.Component {
 									)}
 								</div>
 								
+								<div
+									className={css(styles.runAtStart)}
+									onClick={() => {
+										this.toggleEnableOverlay()
+									}}
+								>
+									{'Enable Overlay (requires restart): '}
+									{this.state.settingsData.enableOverlay ? (
+										<FontAwesomeIcon icon={faToggleOn}/>
+									) : (
+										<FontAwesomeIcon icon={faToggleOff}/>
+									)}
+								</div>
+
 								<div
 									className={css(styles.runAtStart)}
 									onClick={() => {

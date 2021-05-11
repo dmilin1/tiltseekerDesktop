@@ -13,6 +13,7 @@ module.exports = class Settings {
 		bestChampsWhitelist: [],
 		lanesToShow: ['top', 'jungle', 'middle', 'bottom', 'support'],
 		bestChampsLimit: 20,
+		enableOverlay: true,
 		hotkeyIsToggle: false,
 		hotkey: {
 			shiftKey: false,

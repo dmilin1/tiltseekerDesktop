@@ -36,7 +36,9 @@ app.on('ready', () => {
 	require('./SetupScripts/getRiotFolder.js')()
 	clientApi = new ClientApi()
 	mainWindow = makeMainWindow(clientApi)
-	overlayWindow = makeOverlayWindow(clientApi)
+	if (settings.get('enableOverlay')) {
+		overlayWindow = makeOverlayWindow(clientApi)
+	}
 	champSelectWindow = makeChampSelectWindow(clientApi)
 
 
