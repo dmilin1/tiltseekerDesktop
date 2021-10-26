@@ -264,7 +264,6 @@ module.exports = async function(clientApi) {
 	})
 
 	setInterval(() => {
-		console.log('checking')
 		var window = IOVhook.getTopWindows().reduce((prev, window) => {
 			if (prev) {
 				return prev

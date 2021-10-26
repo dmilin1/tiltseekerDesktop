@@ -58,8 +58,10 @@ class ClientApi {
 		this.state.connected = false
 	}
 
-	tryToConnect() {
+	tryToConnect(errCount=0) {
+        console.log('attempting to connect to client')
 		if (!fs.existsSync(this.state.lockfile)) {
+            console.log('lockfile does not exist')
 			return
 		}
 		var lockfileChunks = fs.readFileSync(this.state.lockfile, 'utf8').split(':')
@@ -73,6 +75,7 @@ class ClientApi {
 			password: password,
 		}
 
+        console.log(`connecting to ws${protocol === 'https' ? 's' : ''}://127.0.0.1:${port}`)
 		var connection = new WebSocket(`ws${protocol === 'https' ? 's' : ''}://127.0.0.1:${port}`, {
 			headers: {
 				'Authorization': 'Basic ' +
@@ -91,9 +94,13 @@ class ClientApi {
 			console.log('closed: ' + code)
 			this.didDisconnect()
 		})
-		.on('error', (err) => {
+		.on('error', async (err) => {
 			console.log('error: ' + err)
 			this.didDisconnect()
+            if (errCount < 3) {
+                await new Promise(res => setTimeout(() => res(), errCount ** 2 * 1000))
+                this.tryToConnect(errCount + 1)
+            }
 		})
 		.on('message', (msg) => {
 			try {
