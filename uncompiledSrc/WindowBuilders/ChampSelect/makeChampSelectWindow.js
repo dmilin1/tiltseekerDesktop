@@ -90,11 +90,13 @@ module.exports = function() {
 		}
 
 		if (settings.get('lanesToShow').length < 5) {
-			potentialPicks = potentialPicks.filter(pick => {
-				for (var lane of settings.get('lanesToShow')) {
-					if (this.state.champStats[pick]?.lanes[lane] > 0.15) { return true }
-				}
-			})
+			/* leaving this broken for now until I can update the server to include the missing data */
+			
+			// potentialPicks = potentialPicks.filter(pick => {
+			// 	for (var lane of settings.get('lanesToShow')) {
+			// 		if (this.state.champStats[pick]?.lanes[lane] > 0.15) { return true }
+			// 	}
+			// })
 		}
 
 		if (settings.get('bestChampsOnly')) {
@@ -103,7 +105,8 @@ module.exports = function() {
 		
 		var calculations = winRateCalc.getWinRate(
 			this.state.picksAndBans,
-			this.state.stats,
+			this.state.matchups,
+			this.state.champStats,
 			this.state.localPlayerCellId,
 			potentialPicks,
 			settings.get('compensateForWinrate'),
@@ -147,9 +150,9 @@ module.exports = function() {
 		resetPicksAndBans()
 		dataTransfer.send('winRateData', null)
 		if (phase == 'ChampSelect') {
-			this.state.stats = (await axios.get('https://tiltseeker.com/api/na/stats')).data
-			this.state.champStats = this.state.stats.champStats.reduce((accum, curr) => Object.assign(accum, { [curr['_id']]: curr }), {})
-			this.state.influenceRates = winRateCalc.getInfluenceRates(this.state.stats)
+			this.state.matchups = (await axios.get('https://tiltseeker.com/api/matchups')).data
+			this.state.champStats = (await axios.get('https://tiltseeker.com/api/championStats')).data
+			this.state.influenceRates = this.state.champStats;
 
 			var summonerId = (await clientApi.get('/lol-login/v1/session')).summonerId
 			this.state.championMasteries = await clientApi.get(`/lol-collections/v1/inventories/${summonerId}/champion-mastery`)
