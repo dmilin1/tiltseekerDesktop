@@ -154,8 +154,7 @@ module.exports = function() {
 			this.state.champStats = (await axios.get('https://tiltseeker.com/api/championStats')).data
 			this.state.influenceRates = this.state.champStats;
 
-			var summonerId = (await clientApi.get('/lol-login/v1/session')).summonerId
-			this.state.championMasteries = await clientApi.get(`/lol-collections/v1/inventories/${summonerId}/champion-mastery`)
+			this.state.championMasteries = await clientApi.get(`/lol-champion-mastery/v1/local-player/champion-mastery`)
 
 			this.state.inChampSelect = true
 			windowManager.start()
